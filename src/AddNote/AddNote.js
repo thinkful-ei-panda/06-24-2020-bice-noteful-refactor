@@ -1,18 +1,24 @@
-import React from 'react';
+import React from 'react'
 
-import cuid from 'cuid';
+import { CONFIG } from '../config'
 
-import './AddNote.css';
+import Context from '../Context/Context'
+
+import cuid from 'cuid'
+
+import './AddNote.css'
 
 export default class AddNote extends React.Component {
 
+    static contextType = Context;
+
     formSubmit ( e ) {
         
-        e.preventDefault ();
+        e.preventDefault ()
     
-        const form = new FormData ( e.target );
+        const form = new FormData ( e.target )
         
-        const date = new Date ();
+        const date = new Date ()
         
         const formValuesArray = {
 
@@ -26,19 +32,35 @@ export default class AddNote extends React.Component {
 
             name: form.get ( 'note-name-input' ),
 
-        };
+        }
         
-        this.props.addNote ( formValuesArray );
+        fetch ( `${ CONFIG.API_ENDPOINT_NOTES }/`, {
+
+            method: 'POST',
+			body: JSON.stringify ( formValuesArray ),
+            headers: { 'content-type': 'application/json' }
+
+        } )
+
+        .then ( res => {
+
+            if ( !res.ok ) throw new Error ( res.status )
+
+            return res.json ()
+
+        } )
+    
+        .then ( data => { 
+            
+            this.context.addNote ( formValuesArray )
         
-        let selectVal = form.get ( 'note-folder-select' )
+            let selectVal = form.get ( 'note-folder-select' )
+    
+            this.props.routerProps.history.push ( `/folder/${ selectVal }` )
 
-        this.props.routerProps.history.push ( `/folder/${ selectVal }` );
-
-    }
-
-    selectFolderHighlight ( selectValue ) {
-
-        this.props.folderToHighlight ( selectValue );
+        } )
+    
+        .catch ( error => this.setState ( { error } ) )
 
     }
 
@@ -70,11 +92,11 @@ export default class AddNote extends React.Component {
 
                         <label htmlFor = 'note-folder-select'>Select a folder</label>
 
-                        <select id = 'note-folder-select' name = 'note-folder-select' required onChange = { ( e ) => this.selectFolderHighlight ( e.target.value ) }>
+                        <select id = 'note-folder-select' name = 'note-folder-select' required onChange = { ( e ) => this.context.folderToHighlight ( e.target.value ) }>
 
                                     <option id = 'default'>Choose a folder</option>
 
-                                    { this.props.state.folders.map ( folder => (
+                                    { this.context.folders.map ( folder => (
                                         
                                         <option key = { folder.id } id = { folder.id } value = { folder.id }>{ folder.name }</option>
 
@@ -92,14 +114,16 @@ export default class AddNote extends React.Component {
                     </div>
 
                     <div className = 'add-note-error message-container'>
-
+                        
+                        { this.context.error }
+    
                     </div>
 
                 </form>
                     
             </section>
 
-        );
+        )
 
     }
 

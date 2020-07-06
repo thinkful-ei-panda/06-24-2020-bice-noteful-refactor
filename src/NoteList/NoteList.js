@@ -1,33 +1,73 @@
-import React from 'react';
+import React from 'react'
 
-import { Link } from 'react-router-dom';
+import { CONFIG } from '../config'
 
-import './NoteList.css';
+import Context from '../Context/Context'
+
+import { Link } from 'react-router-dom'
+
+import './NoteList.css'
 
 export default class NoteList extends React.Component {
 
+    static contextType = Context
+
+    deleteClick ( noteId ) {
+
+        fetch ( `${ CONFIG.API_ENDPOINT_NOTES }/${ noteId }`, {
+
+            method: 'DELETE',
+            headers: { 'content-type': 'application/json' }
+
+        } )
+
+        .then ( res => {
+
+            if ( !res.ok ) throw new Error ( res.status )
+
+            return res.json ()
+
+        } )
+    
+        .then ( data => { 
+            
+            //let key = CONFIG.API_ENDPOINT_NOTES.slice ( 22, CONFIG.API_ENDPOINT_NOTES.length )
+            
+            this.context.deleteNote ( noteId )
+
+            //this.setState ( { [ key ]: [ ...data ] } )
+
+            // My preference would be having this move to the relevant folder, rather than index.
+            this.props.routerProps.history.push ( '/' )
+
+        } )
+    
+        .catch ( error => this.setState ( { error } ) )
+    
+    }
+
     render () {
 
-        const pathName = this.props.routerProps.location.pathname;
+        const pathName = this.props.routerProps.location.pathname
 
-        let noteContent = '';
+        let noteContent = ''
 
         // All Notes
-        let filteredNoteList = [...this.props.state.notes];
+        let filteredNoteList = [ ...this.context.notes ]
         
         // Folder filtered notes
         if ( pathName.slice ( 0, 7 ) === '/folder' ) {
 
-            filteredNoteList = filteredNoteList.filter ( note => `/folder/${ note.folderId  }` === pathName );
+            filteredNoteList = filteredNoteList.filter ( note => `/folder/${ note.folderId  }` === pathName )
         
         }
 
         // Single note
         if ( pathName.slice ( 0, 5 ) === '/note' ) {
 
-            filteredNoteList = filteredNoteList.filter ( note => note.id === pathName.slice ( 7, pathName.length ) );
+            filteredNoteList = filteredNoteList.filter ( note => note.id === pathName.slice ( 7, pathName.length ) )
 
-            noteContent = filteredNoteList[0].content;
+            noteContent = filteredNoteList[ 0 ].content
 
         }
 
@@ -77,16 +117,12 @@ export default class NoteList extends React.Component {
                             
                         </div>
 
-                        <Link to = { `/folder/${ note.folderId }` }>
+                        <div className = 'note-delete' aria-label = 'Note delete'>
 
-                            <div className = 'note-delete' aria-label = 'Note delete'>
-
-                                <button value = { note.id } aria-label = 'Note delete button' onClick = { () => this.props.deleteNote ( note.id ) }>Delete</button>
+                            <button value = { note.id } aria-label = 'Note delete button' onClick = { () => this.deleteClick ( note.id ) }>Delete</button>
                                 
-                            </div>
-                            
-                        </Link>
-
+                        </div>
+            
                         <div className = 'note-content'>{ noteContent }</div>
 
                     </article>

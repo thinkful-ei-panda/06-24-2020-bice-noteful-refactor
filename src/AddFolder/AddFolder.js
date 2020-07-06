@@ -1,16 +1,22 @@
-import React from 'react';
+import React from 'react'
 
-import cuid from 'cuid';
+import { CONFIG } from '../config'
 
-import './AddFolder.css';
+import Context from '../Context/Context'
+
+import cuid from 'cuid'
+
+import './AddFolder.css'
 
 export default class AddFolder extends React.Component {
+
+    static contextType = Context
 
     formSubmit ( e ) {
         
         e.preventDefault ();
     
-        const form = new FormData ( e.target );
+        const form = new FormData ( e.target )
 
         const formValuesArray = {
 
@@ -20,9 +26,31 @@ export default class AddFolder extends React.Component {
 
         };
         
-        this.props.addFolder ( formValuesArray );
+        fetch ( `${ CONFIG.API_ENDPOINT_FOLDERS }/`, {
 
-        this.props.routerProps.history.push ( `/folder/${ formValuesArray.id }` );
+            method: 'POST',
+			body: JSON.stringify ( formValuesArray ),
+            headers: { 'content-type': 'application/json' }
+
+        } )
+
+        .then ( res => {
+
+            if ( !res.ok ) throw new Error ( res.status )
+
+            return res.json ()
+
+        } )
+    
+        .then ( () => { 
+            
+            this.context.addFolder ( formValuesArray )
+        
+            this.props.routerProps.history.push ( `/folder/${ formValuesArray.id }` )
+
+        } )
+    
+        .catch ( error => this.setState ( { error } ) )
 
     }
 
@@ -32,7 +60,7 @@ export default class AddFolder extends React.Component {
 
             <section id = 'add-folder-container' aria-label = 'Add a folder form'>
 
-                <form id = 'add-folder-form'  onSubmit={e => this.formSubmit(e)}>
+                <form id = 'add-folder-form'  onSubmit = { e => this.formSubmit ( e ) }>
 
                     <div className = 'add-folder-form-element-container'>
 
@@ -49,14 +77,16 @@ export default class AddFolder extends React.Component {
                     </div>
                             
                     <div className = 'add-folder-error message-container'>
-
+                        
+                        { this.context.error }
+                    
                     </div>
 
                 </form>
                     
             </section>
 
-        );
+        )
 
     }
 

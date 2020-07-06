@@ -2,7 +2,11 @@ import React from 'react';
 
 import { Route, Switch } from 'react-router-dom';
 
-import { STORE } from './Store';
+//import { STORE } from './Store';
+
+import { CONFIG } from './config'
+
+import Context from './Context/Context';
 
 import Header from './Header/Header';
 
@@ -19,101 +23,123 @@ import ErrorPage from './ErrorPage/ErrorPage';
 import './App.css';
 
 export default class App extends React.Component {
-
-	selectFolderHighlight = '';
-
-	constructor ( props ) {
-
-		super ( props );
 	
-		this.state = { ...STORE };
-
+	state = { 
+		folders: [],
+		notes: [],
+		selectFolderHighlight: '',
+		error: null
 	}
 
-	addNote ( addNoteFormValues ) {
-
-		this.setState ({
-	
-			notes: [ ...this.state.notes, addNoteFormValues ]
-	  
-		});
-	
-	}
-
-	deleteNote ( noteId ) {
-
-		const notes = this.state.notes.filter ( note => note.id !== noteId );
+	componentDidMount () {
 		
-		this.setState ( {
+		Object.keys ( CONFIG ).forEach ( item => {
+
+			fetch ( CONFIG[ item ], {
+				method: 'GET',
+				headers: {
+
+					'content-type': 'application/json',
+
+				}
+
+			} )
+
+			.then ( res => {
+
+				if ( !res.ok ) throw new Error ( res.status )
+
+				return res.json ()
+
+			} )
 		
-		folders: [ ...this.state.folders ],
+			.then ( data => { 
+				
+				let key = CONFIG[ item ].slice ( 22, CONFIG[ item ].length )
+				
+				this.setState ( { [key]: [ ...data ] } )
 
-		notes: notes
+			} )
+		
+			.catch ( error => this.setState ( { error } ) )
 
-		} );
+		} )
 
 	}
 
-	addFolder ( addFolderFormValues ) {
+	addNote = ( addNoteFormValues ) => { this.setState ( { notes: [ ...this.state.notes, addNoteFormValues ] } ) }
 
-		this.setState ({
-	
-			folders: [ ...this.state.folders, addFolderFormValues ]
-	  
-		});
-	
+	deleteNote = ( noteId ) => {
+
+		const notes = this.state.notes.filter ( note => note.id !== noteId )
+		
+		this.setState ( { notes: notes } )
+
 	}
 
-	folderToHighlight ( folderId ) {
-		
-		console.log ( folderId );
-		
-		this.selectFolderHighlight = folderId;
+	addFolder = ( addFolderFormValues ) => { this.setState ( { folders: [ ...this.state.folders, addFolderFormValues ] } ) }
 
-		this.forceUpdate ();
-
-	}
+	folderToHighlight = ( folderId ) => { this.setState ( { selectFolderHighlight: folderId } )	}
 
 	render () {
 
+		const contextValue = {
+
+			folders: this.state.folders,
+
+			notes: this.state.notes,
+
+			selectFolderHighlight: this.state.selectFolderHighlight,
+
+			error: this.state.error,
+
+			addNote: this.addNote,
+
+			deleteNote: this.deleteNote,
+
+			addFolder: this.addFolder,
+
+			folderToHighlight: this.folderToHighlight,
+
+		}
+
 		return (
 
-			<div className = 'app'>
-				
-				<Header key = 'Header' />
+			<Context.Provider value = { contextValue }>
 
-				<div id = 'flex-wrapper'>
-
-					<Route key = 'sideBarRoute' path = '/' render = { ( routerProps ) => ( <Sidebar key = 'main-home' routerProps = { routerProps } state = { this.state } selectFolderHighlight = { this.selectFolderHighlight }/> ) } />
-
-					<main>
-							
-						<Switch>
-
-							<Route key = 'homePage' exact path = '/' render = { ( routerProps ) => ( <NoteList key = 'NoteList' routerProps = { routerProps } state = { this.state } deleteNote = { note => this.deleteNote ( note ) } /> ) } />
-
-							<Route key = 'NoteList' exact path = '/folder/:folderId' render = { ( routerProps ) => ( <NoteList key = 'NoteList' routerProps = { routerProps } state = { this.state } deleteNote = { note => this.deleteNote ( note ) } /> ) } />
-
-							<Route key = 'NoteList' exact path = '/notes/:noteId' render = { ( routerProps ) => ( <NoteList key = 'NoteList' routerProps = { routerProps } state = { this.state } deleteNote = { note => this.deleteNote ( note ) } /> ) } />
-							
-							<Route 
-								key = 'addNote' 
-								exact path = '/add-note' 
-								render = { ( routerProps ) => ( <AddNote key = 'AddNote' routerProps = { routerProps } state = { this.state } addNote = { note => this.addNote ( note ) } folderToHighlight = { folder => this.folderToHighlight ( folder ) }/> ) }
-								tmp = { tmp => this.tmp ( tmp ) } 
-							/>
-							
-							<Route key = 'addFolder' exact path = '/add-folder' render = { ( routerProps ) => ( <AddFolder key = 'AddFolder' routerProps = { routerProps } state = { this.state } addFolder = { folder => this.addFolder ( folder ) } /> ) } />
-
-							<Route key = 'error' component = { ErrorPage } />
-
-						</Switch>
+				<div className = 'app'>
 					
-					</main>
+					<Header key = 'Header' />
+
+					<div id = 'flex-wrapper'>
+
+						<Route key = 'sideBarRoute' path = '/' render = { ( routerProps ) => ( <Sidebar key = 'Sidebar' routerProps = { routerProps } /> ) } />
+
+						<main>
+								
+							<Switch>
+
+								<Route key = 'homePage' exact path = '/' render = { ( routerProps ) => ( <NoteList key = 'NoteList' routerProps = { routerProps } /> ) } />
+
+								<Route key = 'NoteList' exact path = '/folder/:folderId' render = { ( routerProps ) => ( <NoteList key = 'NoteList' routerProps = { routerProps } /> ) } />
+
+								<Route key = 'NoteList' exact path = '/notes/:noteId' render = { ( routerProps ) => ( <NoteList key = 'NoteList' routerProps = { routerProps } /> ) } />
+								
+								<Route key = 'addNote' exact path = '/add-note' render = { ( routerProps ) => ( <AddNote key = 'AddNote' routerProps = { routerProps }/> ) } />
+
+								<Route key = 'addFolder' exact path = '/add-folder' render = { ( routerProps ) => ( <AddFolder key = 'AddFolder' routerProps = { routerProps } /> ) } />
+
+								<Route key = 'error' component = { ErrorPage } />
+
+							</Switch>
+						
+						</main>
+
+					</div>
 
 				</div>
 
-			</div>
+			</Context.Provider>
 		
 		);
 
