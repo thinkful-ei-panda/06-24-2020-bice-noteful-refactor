@@ -1,10 +1,10 @@
 import React from 'react';
 
-import Context from '../Context/Context';
+import Context from '../Context/Context'
 
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'
 
-import './Sidebar.css';
+import './Sidebar.css'
 
 export default class Sidebar extends React.Component {
 	
@@ -12,29 +12,29 @@ export default class Sidebar extends React.Component {
 
 	activeFolderClass ( currentFolder ) {
 		
-		let pathName = this.props.routerProps.location.pathname;
+		let pathName = this.props.routerProps.location.pathname
 		
-		const noteId = pathName.slice ( 7, pathName.length );
+		const noteId = pathName.slice ( 7, pathName.length )
 
-		let filteredNoteList = [...this.context.notes]
+		let filteredNoteList = [ ...this.context.notes ]
 
-		filteredNoteList = filteredNoteList.filter ( note => note.id === noteId );
+		filteredNoteList = filteredNoteList.filter ( note => note.id === noteId )
 
 		// Highlights the All folders when displaying the entire note list.
-		if ( pathName === currentFolder ) return 'folder active-folder';
+		if ( pathName === currentFolder ) return 'folder active-folder'
 		
 		// Highlights the folder when displaying a folder list.
-		if ( pathName === `/folder/${currentFolder}` ) return 'folder active-folder';
+		if ( pathName === `/folder/${currentFolder}` ) return 'folder active-folder'
 
 		// Highlights the folder when displaying a single note.
-		if ( pathName.slice ( 0,7 ) === '/notes/' && currentFolder === filteredNoteList[0].folderId ) return 'folder active-folder';
+		if ( pathName.slice ( 0,7 ) === '/notes/' && currentFolder === filteredNoteList[ 0 ].folderId ) return 'folder active-folder'
 
 		// Highlights the folder per onChange of select within AddNote.js
 		//if ( this.props.selectFolderHighlight !== '' ) {
-		if ( pathName === '/add-note' && this.context.selectFolderHighlight === currentFolder ) return 'folder active-folder';
+		if ( pathName === '/add-note' && this.context.selectFolderHighlight === currentFolder ) return 'folder active-folder'
 
 		// Ignore all links not currently active.
-		else return 'folder';
+		else return 'folder'
 		
 	}
 
@@ -67,9 +67,8 @@ export default class Sidebar extends React.Component {
 				</Link>
 
 			</nav>
-			
 
-		);
+		)
 
 	}
 

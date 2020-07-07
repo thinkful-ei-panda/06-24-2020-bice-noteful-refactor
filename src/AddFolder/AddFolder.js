@@ -6,9 +6,42 @@ import Context from '../Context/Context'
 
 import cuid from 'cuid'
 
+import ValidationError from '../ValidationError/ValidationError'
+
 import './AddFolder.css'
 
 export default class AddFolder extends React.Component {
+
+    constructor ( props ) {
+
+		super(props);
+
+		this.state = {
+
+			name: {
+                value: '',
+                touched: false
+            }
+
+        }
+        
+    }
+
+    updateName ( name ) {
+
+        this.setState ( { name: { value: name, touched: true } } )
+
+    }
+    
+    validateName () {
+
+		const name = this.state.name.value.trim ()
+        
+        if ( name.length === 0 ) return ' is required' 
+        
+        else if ( name.length < 3 ) return ' must be at least 3 characters long'
+
+    }
 
     static contextType = Context
 
@@ -56,6 +89,8 @@ export default class AddFolder extends React.Component {
 
     render () {
 
+        const nameError = this.validateName ();
+
         return (
 
             <section id = 'add-folder-container' aria-label = 'Add a folder form'>
@@ -64,15 +99,15 @@ export default class AddFolder extends React.Component {
 
                     <div className = 'add-folder-form-element-container'>
 
-                        <label htmlFor = 'folder-name-input'>Name</label>
+                        <label htmlFor = 'folder-name-input'>Folder Name { ( <ValidationError message = { nameError } /> ) }</label>
                             
-                        <input type = 'text' name = 'folder-name-input' id = 'folder-name-input' placeholder = 'Folder name'/>
+                        <input type = 'text' name = 'folder-name-input' id = 'folder-name-input' placeholder = 'Folder name' required  onChange = { e => this.updateName ( e.target.value ) }/>
 
                     </div>
 
                     <div className = 'add-folder-form-element-container'>
 
-                        <button type = 'submit'>Add folder</button>
+                        <button type = 'submit' disabled = { this.validateName () }>Add folder</button>
 
                     </div>
                             

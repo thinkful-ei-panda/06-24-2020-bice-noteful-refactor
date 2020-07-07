@@ -133,7 +133,7 @@ export default class NoteList extends React.Component {
 
             </>
 
-        );
+        )
 
     }
 

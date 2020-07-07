@@ -43,3 +43,6 @@
 	width: 90%;
 	color: #ff0000;
 }
+.error {
+	display: inline-block;
+}

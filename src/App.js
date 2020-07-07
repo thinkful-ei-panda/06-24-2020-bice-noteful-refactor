@@ -1,26 +1,26 @@
-import React from 'react';
+import React from 'react'
 
-import { Route, Switch } from 'react-router-dom';
-
-//import { STORE } from './Store';
+import { Route, Switch } from 'react-router-dom'
 
 import { CONFIG } from './config'
 
-import Context from './Context/Context';
+import Context from './Context/Context'
 
-import Header from './Header/Header';
+import Header from './Header/Header'
 
-import Sidebar from './Sidebar/Sidebar';
+import Sidebar from './Sidebar/Sidebar'
 
-import NoteList from './NoteList/NoteList';
+import NoteList from './NoteList/NoteList'
 
-import AddNote from './AddNote/AddNote';
+import AddNote from './AddNote/AddNote'
 
-import AddFolder from './AddFolder/AddFolder';
+import AddFolder from './AddFolder/AddFolder'
 
-import ErrorPage from './ErrorPage/ErrorPage';
+import ErrorPage from './ErrorPage/ErrorPage'
 
-import './App.css';
+import ErrorBoundary from './ErrorBoundary/ErrorBoundary'
+
+import './App.css'
 
 export default class App extends React.Component {
 	
@@ -31,6 +31,12 @@ export default class App extends React.Component {
 		error: null
 	}
 
+	static getDerivedStateFromError ( error ) {
+	
+		return { hasError: true }
+	
+	}
+	
 	componentDidMount () {
 		
 		Object.keys ( CONFIG ).forEach ( item => {
@@ -109,28 +115,40 @@ export default class App extends React.Component {
 
 				<div className = 'app'>
 					
-					<Header key = 'Header' />
-
+					<ErrorBoundary>
+					
+						<Header key = 'Header' />
+					
+					</ErrorBoundary>
+					
 					<div id = 'flex-wrapper'>
-
-						<Route key = 'sideBarRoute' path = '/' render = { ( routerProps ) => ( <Sidebar key = 'Sidebar' routerProps = { routerProps } /> ) } />
+					
+						<ErrorBoundary>
+							
+							<Route key = 'sideBarRoute' path = '/' render = { ( routerProps ) => ( <Sidebar key = 'Sidebar' routerProps = { routerProps } /> ) } />
+						
+						</ErrorBoundary>
 
 						<main>
 								
 							<Switch>
+	
+								<ErrorBoundary>
+	
+									<Route key = 'homePage' exact path = '/' render = { ( routerProps ) => ( <NoteList key = 'NoteList' routerProps = { routerProps } /> ) } />
 
-								<Route key = 'homePage' exact path = '/' render = { ( routerProps ) => ( <NoteList key = 'NoteList' routerProps = { routerProps } /> ) } />
+									<Route key = 'FolderList' exact path = '/folder/:folderId' render = { ( routerProps ) => ( <NoteList key = 'NoteList' routerProps = { routerProps } /> ) } />
 
-								<Route key = 'NoteList' exact path = '/folder/:folderId' render = { ( routerProps ) => ( <NoteList key = 'NoteList' routerProps = { routerProps } /> ) } />
+									<Route key = 'NoteList' exact path = '/notes/:noteId' render = { ( routerProps ) => ( <NoteList key = 'NoteList' routerProps = { routerProps } /> ) } />
+									
+									<Route key = 'addNote' exact path = '/add-note' render = { ( routerProps ) => ( <AddNote key = 'AddNote' routerProps = { routerProps }/> ) } />
 
-								<Route key = 'NoteList' exact path = '/notes/:noteId' render = { ( routerProps ) => ( <NoteList key = 'NoteList' routerProps = { routerProps } /> ) } />
-								
-								<Route key = 'addNote' exact path = '/add-note' render = { ( routerProps ) => ( <AddNote key = 'AddNote' routerProps = { routerProps }/> ) } />
+									<Route key = 'addFolder' exact path = '/add-folder' render = { ( routerProps ) => ( <AddFolder key = 'AddFolder' routerProps = { routerProps } /> ) } />
 
-								<Route key = 'addFolder' exact path = '/add-folder' render = { ( routerProps ) => ( <AddFolder key = 'AddFolder' routerProps = { routerProps } /> ) } />
+								</ErrorBoundary>
 
 								<Route key = 'error' component = { ErrorPage } />
-
+							
 							</Switch>
 						
 						</main>
@@ -141,7 +159,7 @@ export default class App extends React.Component {
 
 			</Context.Provider>
 		
-		);
+		)
 
 	}
 
